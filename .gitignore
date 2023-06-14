@@ -1,0 +1,5 @@
+# Carpeta de dependencias generada por npm
+node_modules/
+
+# Carpeta de dependencias generada por Yarn
+yarn.lock
