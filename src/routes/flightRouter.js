@@ -19,13 +19,13 @@ flightRouter.get("/:id/passengers", async (req, res) => {
     const orderedBySeat = orderedPassengers(passengers);
     const occupiedSeatId = notAvailableSeat(orderedBySeat);
     const airplaneId = flight[0].airplane_id;
-
+    /* 
     const needToSeat = takeSeat(
       orderedBySeat,
       airplaneId,
       occupiedSeatId,
       queryTypeOfSeat
-    );
+    ); */
 
     res.status(200).json({
       code: 200,
