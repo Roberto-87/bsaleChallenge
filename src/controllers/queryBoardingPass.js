@@ -1,6 +1,6 @@
 const connection = require("../connection");
 
-const queryBoardingPass = () => {
+const queryBoardingPass = (id) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT
       passenger.passenger_id,
@@ -16,7 +16,7 @@ const queryBoardingPass = () => {
       passenger
       JOIN boarding_pass ON passenger.passenger_id = boarding_pass.passenger_id
     WHERE
-      boarding_pass.flight_id = 1;`;
+      boarding_pass.flight_id = ${id}`;
 
     connection.query(query, (error, data) => {
       if (error) {
