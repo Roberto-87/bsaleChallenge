@@ -1,9 +1,10 @@
 const { Router } = require("express");
 const queryFlight = require("../controllers/queryFlight");
 const queryBoardingPass = require("../controllers/queryBoardingPass");
-const returnSeats = require("../controllers/returnSeats");
-const seatAvailable = require("../controllers/seatsIdsNulls");
-const seatsIdsNull = require("../controllers/seatsIdsNulls");
+const querySeatType = require("../controllers/querySeatType");
+const orderedPassengers = require("../controllers/orderedPassengers");
+const notAvailableSeat = require("../controllers/notAvailableSeat");
+const takeSeat = require("../controllers/takeSeat");
 
 const flightRouter = Router();
 
@@ -11,11 +12,20 @@ flightRouter.get("/:id/passengers", async (req, res) => {
   try {
     const { id } = req.params;
     const flight = await queryFlight(id);
-    const boardingPass = await queryBoardingPass(id);
     if (!flight) throw new Error("Flight not found");
-    if (!boardingPass) throw new Error("Boarding Pass not found");
-    const takeSeat = returnSeats(boardingPass); //retorna intersección purchase_id > 18 y purchase_id < 18
-    const seatAvailable = seatsIdsNull(boardingPass); //seat_id available
+    const passengers = await queryBoardingPass(id);
+    if (!passengers) throw new Error("Boarding Pass not found");
+    const queryTypeOfSeat = await querySeatType(); //traigo el mapa de asientos de la db
+    const orderedBySeat = orderedPassengers(passengers);
+    const occupiedSeatId = notAvailableSeat(orderedBySeat);
+    const airplaneId = flight[0].airplane_id;
+
+    const needToSeat = takeSeat(
+      orderedBySeat,
+      airplaneId,
+      occupiedSeatId,
+      queryTypeOfSeat
+    );
 
     res.status(200).json({
       code: 200,
@@ -26,7 +36,7 @@ flightRouter.get("/:id/passengers", async (req, res) => {
         landingDateTime: flight[0].landing_date_time,
         landingAirport: flight[0].landing_airport,
         airplaneId: flight[0].airplane_id,
-        passengers: seatAvailable,
+        passengers: orderedBySeat,
       },
     });
   } catch (error) {
