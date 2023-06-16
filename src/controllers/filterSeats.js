@@ -1,17 +1,16 @@
-const filterSeats = (seatTypeId, airplaneId) => {
-  return seat.filter(
+const notAvailableSeat = require("../controllers/notAvailableSeat");
+const querySeatType = require("../controllers/querySeatType");
+
+const filterSeats = async (seatTypeId, airplaneId, orderedBySeat) => {
+  const notAvailable = notAvailableSeat(orderedBySeat);
+  const queryTypeOfSeat = await querySeatType(); //traigo el mapa de asientos de la db
+
+  return queryTypeOfSeat.filter(
     (airplane) =>
       airplane.airplane_id === airplaneId &&
-      airplane.seat_type_id === seatTypeId
+      airplane.seat_type_id === seatTypeId &&
+      !notAvailable.includes(airplane.seat_id) //filtro también los que están ocupados
   );
 };
 
 module.exports = filterSeats;
-/* 
-const turistAirplaneOne = filterSeats(1, 3);
-const turistPremiumAirplaneOne = filterSeats(1, 2);
-const FirstClassAirplaneOne = filterSeats(1, 1);
-const turistAirplaneTwo = filterSeats(2, 3);
-const turistPremiumAirplaneTwo = filterSeats(2, 2);
-const FirstClassAirplaneTwo = filterSeats(2, 1);
- */
