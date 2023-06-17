@@ -1,7 +1,10 @@
-const notAvailableSeat = (orderedBySeat) => {
-  const occupiedSeat = orderedBySeat
-    .filter((passenger) => passenger.seat_id !== null)
-    .map((passenger) => passenger.seat_id);
+const notAvailableSeat = (passengers, airplaneId) => {
+  const occupiedSeat = passengers
+    .filter(
+      (passenger) =>
+        passenger.seat_id !== null && passenger.airplane_id === airplaneId
+    )
+    .map((passengerSeat) => passengerSeat.seat_id);
 
   return occupiedSeat;
 };

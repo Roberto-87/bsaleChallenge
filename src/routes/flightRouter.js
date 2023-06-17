@@ -2,8 +2,11 @@ const { Router } = require("express");
 const queryFlight = require("../controllers/queryFlight");
 const queryBoardingPass = require("../controllers/queryBoardingPass");
 const orderedPassengers = require("../controllers/orderedPassengers");
-const returnNextSeat = require("../controllers/returnNextSeat");
+const underAgePassenger = require("../controllers/underAgePassenger");
 const filterSeats = require("../controllers/filterSeats");
+const returnNextSeat = require("../controllers/returnNextSeat");
+const notAvailableSeat = require("../controllers/notAvailableSeat");
+const returnNextColumn = require("../controllers/returnNextColumn");
 
 const flightRouter = Router();
 
@@ -16,44 +19,73 @@ flightRouter.get("/:id/passengers", async (req, res) => {
     if (!passengers) throw new Error("Boarding Pass not found");
     const orderedBySeat = orderedPassengers(passengers);
     const airplaneId = flight[0].airplane_id;
+    let notAvailable = notAvailableSeat(orderedBySeat, airplaneId);
 
+    const underAgeAndAdultSeats = await underAgePassenger(
+      passengers,
+      airplaneId,
+      orderedBySeat
+    );
     for (let i = 0; i < passengers.length; i++) {
-      if (
-        passengers[i].age < 18 &&
-        passengers[i].seat_id === null &&
-        passengers[i + 1] &&
-        passengers[i + 1].purchase_id === passengers[i].purchase_id &&
-        passengers[i + 1].age >= 18
-      ) {
-        let seatByType = await filterSeats(
-          passengers[i].seat_type_id,
-          airplaneId,
-          orderedBySeat
-        );
-        const seatIds = seatByType.map((seat) => seat.seat_id);
-        const minValue = Math.min(...seatIds);
-        //de los seatByType elijo un asiento que no esté ocupado !occupiedSeatId.includes(seat elegido)
-        passengers[i].seat_id = minValue; //acá falta la lógica que trae el asiento por tipo de asiento y avion
-        passengers[i + 1].seat_id = await returnNextSeat(minValue, airplaneId);
-      } else if (
-        passengers[i].age < 18 &&
-        passengers[i].seat_id === null &&
-        passengers[i - 1] &&
-        passengers[i - 1].purchase_id === passengers[i].purchase_id &&
-        passengers[i - 1].age >= 18
-      ) {
-        let seatByType = await filterSeats(
-          passengers[i].seat_type_id,
-          airplaneId,
-          orderedBySeat
-        );
-        const seatIds = seatByType.map((seat) => seat.seat_id);
-        const minValue = Math.min(...seatIds);
-        //de los seatByType elijo un asiento que no esté ocupado !occupiedSeatId.includes(seat elegido)
-        passengers[i].seat_id = minValue; //acá falta la lógica que trae el asiento por tipo de asiento y avion
-        passengers[i - 1].seat_id = await returnNextSeat(minValue, airplaneId);
+      let passenger = passengers[i];
+      let nextPassenger = passengers[i + 1];
+      let previousPassenger = passengers[i - 1];
+      let passengerSeatType = passenger.seat_type_id;
 
-        //si son adultos y tienen el mismo purchase_id y el next asiento no está incluido en notAvailableSeat le damos el next sino usamos una función que se llame closer y los acomodamos en el next asiento de cercanía en fila o columna
+      if (
+        (passenger.seat_id === null &&
+          nextPassenger &&
+          nextPassenger.seat_id === null) ||
+        (passenger.seat_id === null &&
+          previousPassenger &&
+          previousPassenger.seat_id === null)
+      ) {
+        if (
+          passenger.purchase_id === nextPassenger.purchase_id ||
+          passenger.purchase_id === previousPassenger.purchase_id
+        ) {
+          {
+            let seatByType = await filterSeats(
+              passengerSeatType,
+              airplaneId,
+              orderedBySeat
+            );
+            const seatIds = seatByType.map((seat) => seat.seat_id);
+            const minValue = Math.min(...seatIds);
+            const nextSeat = await returnNextSeat(minValue, airplaneId);
+
+            if (!notAvailable.includes(minValue)) {
+              passenger.seat_id = minValue;
+              notAvailable.push(minValue);
+            }
+            if (!notAvailable.includes(nextSeat)) {
+              nextPassenger.seat_id = nextSeat;
+              notAvailable.push(nextSeat);
+            }
+            /*
+            else if (notAvailable.includes(nextSeat)) {
+              passenger.seat_id = nextColumn;
+              notAvailable.push(nextColumn);
+            }
+
+           
+            else {
+              nextSeat++;
+            }
+
+           else if (!notAvailable.includes(nextColumn)) {
+              passenger.seat_id = nextColumn;
+              notAvailable.push(nextColumn);
+            }  */
+            /*  */
+            /* 
+            const nextColumn = await returnNextColumn(minValue, airplaneId);
+            else if (nextPassenger && !notAvailable.includes(nextColumn)) {
+              nextPassenger.seat_id = nextColumn;
+              notAvailable.push(nextColumn);
+            } */
+          }
+        }
       }
     }
     res.status(200).json({

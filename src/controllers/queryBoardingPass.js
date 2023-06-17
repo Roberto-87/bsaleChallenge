@@ -1,6 +1,8 @@
 const connection = require("../connection");
 
 const queryBoardingPass = (id) => {
+  const passengers = [];
+
   return new Promise((resolve, reject) => {
     const query = `SELECT
       passenger.passenger_id,
