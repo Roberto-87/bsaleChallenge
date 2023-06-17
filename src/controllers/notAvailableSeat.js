@@ -1,9 +1,6 @@
-const notAvailableSeat = (passengers, airplaneId) => {
+const notAvailableSeat = (passengers) => {
   const occupiedSeat = passengers
-    .filter(
-      (passenger) =>
-        passenger.seat_id !== null && passenger.airplane_id === airplaneId
-    )
+    .filter((passenger) => passenger.seat_id !== null)
     .map((passengerSeat) => passengerSeat.seat_id);
 
   return occupiedSeat;

@@ -19,7 +19,7 @@ flightRouter.get("/:id/passengers", async (req, res) => {
     if (!passengers) throw new Error("Boarding Pass not found");
     const orderedBySeat = orderedPassengers(passengers);
     const airplaneId = flight[0].airplane_id;
-    let notAvailable = notAvailableSeat(orderedBySeat, airplaneId);
+    let notAvailable = notAvailableSeat(passengers);
 
     const underAgeAndAdultSeats = await underAgePassenger(
       passengers,
@@ -45,13 +45,13 @@ flightRouter.get("/:id/passengers", async (req, res) => {
           passenger.purchase_id === previousPassenger.purchase_id
         ) {
           {
-            let seatByType = await filterSeats(
+            let availableSeats = await filterSeats(
               passengerSeatType,
               airplaneId,
               orderedBySeat
             );
-            const seatIds = seatByType.map((seat) => seat.seat_id);
-            const minValue = Math.min(...seatIds);
+            const availableSeatId = availableSeats.map((seat) => seat.seat_id);
+            const minValue = Math.min(...availableSeatId);
             const nextSeat = await returnNextSeat(minValue, airplaneId);
 
             if (!notAvailable.includes(minValue)) {
@@ -61,29 +61,18 @@ flightRouter.get("/:id/passengers", async (req, res) => {
             if (!notAvailable.includes(nextSeat)) {
               nextPassenger.seat_id = nextSeat;
               notAvailable.push(nextSeat);
-            }
-            /*
-            else if (notAvailable.includes(nextSeat)) {
-              passenger.seat_id = nextColumn;
-              notAvailable.push(nextColumn);
-            }
-
-           
-            else {
-              nextSeat++;
-            }
-
-           else if (!notAvailable.includes(nextColumn)) {
-              passenger.seat_id = nextColumn;
-              notAvailable.push(nextColumn);
-            }  */
-            /*  */
-            /* 
-            const nextColumn = await returnNextColumn(minValue, airplaneId);
-            else if (nextPassenger && !notAvailable.includes(nextColumn)) {
-              nextPassenger.seat_id = nextColumn;
-              notAvailable.push(nextColumn);
-            } */
+            } /* else {
+              let nextAvailableSeat = availableSeatId.find(
+                (seat) => !notAvailable.includes(seat)
+              );
+              if (nextAvailableSeat) {
+                nextPassenger.seat_id = nextAvailableSeat;
+                notAvailable.push(nextAvailableSeat);
+              } else if (!notAvailable.includes(nextColumn)) {
+                passenger.seat_id = nextColumn;
+                notAvailable.push(nextColumn);
+              } 
+            }*/
           }
         }
       }
