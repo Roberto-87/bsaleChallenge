@@ -25,11 +25,11 @@ function handleDisconnect() {
 
 handleDisconnect();
 
-process.on("SIGINT", () => {
+/* process.on("SIGINT", () => {
   console.log("Reiniciando conexión con la base de datos...");
   connection.end(() => {
     handleDisconnect();
   });
-});
+}); */
 
 module.exports = connection;
