@@ -7,6 +7,7 @@ const filterSeats = require("../controllers/filterSeats");
 const returnNextSeat = require("../controllers/returnNextSeat");
 const notAvailableSeat = require("../controllers/notAvailableSeat");
 const returnNextColumn = require("../controllers/returnNextColumn");
+const changeDataPassengers = require("../controllers/changeDataPassengers");
 
 const flightRouter = Router();
 
@@ -15,9 +16,10 @@ flightRouter.get("/:id/passengers", async (req, res) => {
     const { id } = req.params;
     const flight = await queryFlight(id);
     if (!flight) throw new Error("Flight not found");
-    const passengers = await queryBoardingPass(id);
-    if (!passengers) throw new Error("Boarding Pass not found");
-    const orderedBySeat = orderedPassengers(passengers);
+    let passengers = await queryBoardingPass(id);
+    const passengersData = changeDataPassengers(passengers);
+    if (!passengersData) throw new Error("Boarding Pass not found");
+    const orderedBySeat = orderedPassengers(passengersData);
     const airplaneId = flight[0].airplane_id;
     const underAgeAndAdultSeats = await underAgePassenger(
       passengers,
