@@ -86,7 +86,7 @@ flightRouter.get("/:id/passengers", async (req, res) => {
         landingDateTime: flight[0].landing_date_time,
         landingAirport: flight[0].landing_airport,
         airplaneId: flight[0].airplane_id,
-        passengers: passengers,
+        passengers: changeDataPassengers(passengers),
       },
     });
   } catch (error) {
