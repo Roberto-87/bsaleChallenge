@@ -59,20 +59,35 @@ flightRouter.get("/:id/passengers", async (req, res) => {
             const availableSeatId = availableSeats.map((seat) => seat.seat_id);
             const minValue = Math.min(...availableSeatId);
             const nextSeat = await returnNextSeat(minValue, airplaneId);
-            //const nextColumn = await returnNextColumn(minValue, airplaneId);
 
             if (!notAvailable.includes(minValue)) {
               passenger.seat_id = minValue;
               notAvailable.push(minValue);
             }
-
             if (!notAvailable.includes(nextSeat)) {
               nextPassenger.seat_id = nextSeat;
               notAvailable.push(nextSeat);
-            } /* else if (!notAvailable.includes(nextColumn)) {
-              nextPassenger.seat_id = nextColumn;
-              notAvailable.push(nextSeat);
-            } */
+            }
+          }
+        }
+      } else if (
+        passenger.seat_id === null ||
+        (passenger.seat_id === null &&
+          passenger.purchase_id !== nextPassenger.purchase_id &&
+          passenger.purchase_id !== previousPassenger.purchase_id)
+      ) {
+        {
+          let availableSeats = await filterSeats(
+            passengerSeatType,
+            airplaneId,
+            orderedBySeat
+          );
+          const availableSeatId = availableSeats.map((seat) => seat.seat_id);
+          const minValue = Math.min(...availableSeatId);
+
+          if (!notAvailable.includes(minValue)) {
+            passenger.seat_id = minValue;
+            notAvailable.push(minValue);
           }
         }
       }
