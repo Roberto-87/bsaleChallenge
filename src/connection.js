@@ -10,8 +10,8 @@ function handleDisconnect() {
     user: USER,
     password: PASSWORD,
     database: DATABASE,
-    connectTimeout: 5000,
-    multipleStatements: true,
+    /*     connectTimeout: 5000,
+    multipleStatements: true, */
   });
 
   connection.connect((err) => {
