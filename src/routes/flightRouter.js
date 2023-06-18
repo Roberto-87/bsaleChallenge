@@ -19,13 +19,14 @@ flightRouter.get("/:id/passengers", async (req, res) => {
     if (!passengers) throw new Error("Boarding Pass not found");
     const orderedBySeat = orderedPassengers(passengers);
     const airplaneId = flight[0].airplane_id;
-    let notAvailable = notAvailableSeat(passengers);
-
     const underAgeAndAdultSeats = await underAgePassenger(
       passengers,
       airplaneId,
       orderedBySeat
     );
+    let notAvailable = notAvailableSeat(passengers);
+    notAvailable.push(underAgeAndAdultSeats);
+
     for (let i = 0; i < passengers.length; i++) {
       let passenger = passengers[i];
       let nextPassenger = passengers[i + 1];

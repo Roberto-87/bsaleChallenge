@@ -1,16 +1,17 @@
 require("dotenv").config();
 const mysql = require("mysql2");
-//&const { HOST, USER, PASSWORD, DATABASE } = process.env;
+const { HOST, USER, PASSWORD, DATABASE } = process.env;
 
 let connection;
 
 function handleDisconnect() {
   connection = mysql.createConnection({
-    host: "mdb-test.c6vunyturrl6.us-west-1.rds.amazonaws.com",
-    user: "bsale_test",
-    password: "bsale_test",
-    database: "airline",
+    host: HOST,
+    user: USER,
+    password: PASSWORD,
+    database: DATABASE,
   });
+
   connection.connect((err) => {
     if (err) {
       console.error("Error al conectar a la base de datos:", err);
