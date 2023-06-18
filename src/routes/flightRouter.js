@@ -24,8 +24,11 @@ flightRouter.get("/:id/passengers", async (req, res) => {
       airplaneId,
       orderedBySeat
     );
-    let notAvailable = notAvailableSeat(passengers);
-    notAvailable.push(underAgeAndAdultSeats);
+
+    const notAvailable = [
+      ...notAvailableSeat(passengers),
+      ...underAgeAndAdultSeats,
+    ];
 
     for (let i = 0; i < passengers.length; i++) {
       let passenger = passengers[i];
@@ -54,26 +57,20 @@ flightRouter.get("/:id/passengers", async (req, res) => {
             const availableSeatId = availableSeats.map((seat) => seat.seat_id);
             const minValue = Math.min(...availableSeatId);
             const nextSeat = await returnNextSeat(minValue, airplaneId);
+            //const nextColumn = await returnNextColumn(minValue, airplaneId);
 
             if (!notAvailable.includes(minValue)) {
               passenger.seat_id = minValue;
               notAvailable.push(minValue);
             }
+
             if (!notAvailable.includes(nextSeat)) {
               nextPassenger.seat_id = nextSeat;
               notAvailable.push(nextSeat);
-            } /* else {
-              let nextAvailableSeat = availableSeatId.find(
-                (seat) => !notAvailable.includes(seat)
-              );
-              if (nextAvailableSeat) {
-                nextPassenger.seat_id = nextAvailableSeat;
-                notAvailable.push(nextAvailableSeat);
-              } else if (!notAvailable.includes(nextColumn)) {
-                passenger.seat_id = nextColumn;
-                notAvailable.push(nextColumn);
-              } 
-            }*/
+            } /* else if (!notAvailable.includes(nextColumn)) {
+              nextPassenger.seat_id = nextColumn;
+              notAvailable.push(nextSeat);
+            } */
           }
         }
       }

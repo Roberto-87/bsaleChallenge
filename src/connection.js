@@ -10,6 +10,8 @@ function handleDisconnect() {
     user: USER,
     password: PASSWORD,
     database: DATABASE,
+    connectTimeout: 5000,
+    multipleStatements: true,
   });
 
   connection.connect((err) => {
@@ -22,5 +24,12 @@ function handleDisconnect() {
 }
 
 handleDisconnect();
+
+process.on("SIGINT", () => {
+  console.log("Reiniciando conexión con la base de datos...");
+  connection.end(() => {
+    handleDisconnect();
+  });
+});
 
 module.exports = connection;
